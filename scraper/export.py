@@ -12,6 +12,7 @@ FIELDNAMES = [
     "price",
     "rating",
     "availability",
+    "stock_count",
     "category",
     "product_url",
 ]
@@ -29,6 +30,7 @@ def write_csv(books: list[Book], path: Path) -> None:
                     "price": f"{book.price:.2f}",
                     "rating": book.rating,
                     "availability": book.availability,
+                    "stock_count": "" if book.stock_count is None else book.stock_count,
                     "category": book.category,
                     "product_url": book.product_url,
                 }
@@ -48,6 +50,7 @@ def write_xlsx(books: list[Book], path: Path) -> None:
                 book.price,
                 book.rating,
                 book.availability,
+                book.stock_count,
                 book.category,
                 book.product_url,
             ]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from html import unescape
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -16,6 +17,7 @@ RATING_WORDS = {
 }
 
 PRICE_RE = re.compile(r"[\d.]+")
+STOCK_COUNT_RE = re.compile(r"\((\d+) available\)")
 
 
 def rating_from_class(star_rating_el) -> int | None:
@@ -56,7 +58,8 @@ def parse_listing_page(html: str, page_url: str) -> list[dict]:
         if not relative_href:
             continue
 
-        title = title_link.get("title") or title_link.get_text(strip=True)
+        raw_title = title_link.get("title") or title_link.get_text(strip=True)
+        title = unescape(raw_title)
         product_url = urljoin(page_url, relative_href)
 
         rating = rating_from_class(article.select_one("p.star-rating"))
@@ -78,17 +81,39 @@ def parse_listing_page(html: str, page_url: str) -> list[dict]:
 
 def parse_category_from_product_page(html: str) -> str | None:
     """Return the book's category from breadcrumb (second-to-last crumb)."""
+    return parse_product_page(html)["category"]
+
+
+def parse_stock_count(availability_text: str | None) -> int | None:
+    if not availability_text:
+        return None
+    match = STOCK_COUNT_RE.search(availability_text)
+    if match is None:
+        return None
+    return int(match.group(1))
+
+
+def parse_product_page(html: str) -> dict:
+    """Parse category, availability, and stock count from a book detail page."""
     soup = BeautifulSoup(html, "html.parser")
     crumbs = soup.select("ul.breadcrumb li")
-    if len(crumbs) < 2:
-        return None
+    category: str | None = None
+    if len(crumbs) >= 2:
+        category_li = crumbs[-2]
+        link = category_li.select_one("a")
+        if link is not None:
+            category = link.get_text(strip=True)
+        else:
+            category = category_li.get_text(strip=True) or None
 
-    # Last item is the book title (active); category is usually the one before it.
-    category_li = crumbs[-2]
-    link = category_li.select_one("a")
-    if link is not None:
-        return link.get_text(strip=True)
-    return category_li.get_text(strip=True) or None
+    availability = parse_availability(soup.select_one("p.availability"))
+    stock_count = parse_stock_count(availability)
+
+    return {
+        "category": category,
+        "availability": availability,
+        "stock_count": stock_count,
+    }
 
 
 def catalogue_page_url(page: int) -> str:

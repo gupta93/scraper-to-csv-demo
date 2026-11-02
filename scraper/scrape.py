@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from scraper.client import HttpClient, PageFetcher
 from scraper.models import Book
-from scraper.parser import catalogue_page_url, parse_category_from_product_page, parse_listing_page
+from scraper.parser import catalogue_page_url, parse_listing_page, parse_product_page
 from scraper.validate import dedupe_books, validate_books
 
 
@@ -35,17 +35,21 @@ def scrape_books(
                 )
 
             detail_html = client.get(partial["product_url"])
-            category = parse_category_from_product_page(detail_html)
-            if not category:
+            detail = parse_product_page(detail_html)
+            if not detail["category"]:
                 raise ScrapeError(f"Could not parse category for {partial['product_url']}")
+            availability = detail["availability"] or partial["availability"]
+            if not availability:
+                raise ScrapeError(f"Could not parse availability for {partial['product_url']}")
 
             books.append(
                 Book(
                     title=partial["title"],
                     price=partial["price"],
                     rating=partial["rating"],
-                    availability=partial["availability"],
-                    category=category,
+                    availability=availability,
+                    stock_count=detail["stock_count"],
+                    category=detail["category"],
                     product_url=partial["product_url"],
                 )
             )

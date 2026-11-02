@@ -43,4 +43,5 @@ class HttpClient:
             time.sleep(self.delay_seconds)
         response = self._session.get(url, timeout=self.timeout)
         response.raise_for_status()
+        response.encoding = "utf-8"
         return response.text

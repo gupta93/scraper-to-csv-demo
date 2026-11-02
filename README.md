@@ -13,21 +13,22 @@ For each book, the scraper records:
 | **title** | A Light in the Attic |
 | **price** | 51.77 (GBP, numeric in Excel) |
 | **rating** | 3 (1–5 stars) |
-| **availability** | In stock |
+| **availability** | In stock (22 available) |
+| **stock_count** | 22 (from the book page, when listed) |
 | **category** | Poetry |
 | **product_url** | Link back to the book page |
 
-A full run across all **50 catalogue pages** produces **1,000 books**. Sample output is included in the [`output/`](output/) folder.
+A full run across all **50 catalogue pages** produces **1,000 books**. Sample output is included in the [`output/`](output/) folder — **re-running the scraper overwrites** `output/books.csv` and `output/books.xlsx`.
 
 ### Preview (first rows)
 
-| title | price | rating | availability | category |
-|-------|------:|-------:|--------------|----------|
-| A Light in the Attic | 51.77 | 3 | In stock | Poetry |
-| Tipping the Velvet | 53.74 | 1 | In stock | Historical Fiction |
-| Soumission | 50.10 | 1 | In stock | Fiction |
-| Sharp Objects | 47.82 | 4 | In stock | Mystery |
-| Sapiens: A Brief History of Humankind | 54.23 | 5 | In stock | History |
+| title | price | rating | availability | stock_count | category |
+|-------|------:|-------:|--------------|------------:|----------|
+| A Light in the Attic | 51.77 | 3 | In stock (22 available) | 22 | Poetry |
+| Tipping the Velvet | 53.74 | 1 | In stock (20 available) | 20 | Historical Fiction |
+| Soumission | 50.10 | 1 | In stock (20 available) | 20 | Fiction |
+| Sharp Objects | 47.82 | 4 | In stock (20 available) | 20 | Mystery |
+| Sapiens: A Brief History of Humankind | 54.23 | 5 | In stock (20 available) | 20 | History |
 
 ## Quick start
 
@@ -53,7 +54,7 @@ When it finishes, open `output/books.csv` or `output/books.xlsx`.
 
 1. Download each catalogue page with **requests**, using a clear user-agent, retries, and short delays.
 2. Parse HTML with **BeautifulSoup** to read titles, prices, ratings, and stock status.
-3. Visit each book page once to read its **category** from the breadcrumb trail.
+3. Visit each book page once to read its **category**, **availability**, and **stock count**.
 4. Remove duplicate URLs and validate rows (price, rating range, required fields).
 5. Write **CSV** and **Excel** files.
 

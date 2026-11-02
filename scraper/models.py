@@ -7,6 +7,7 @@ class Book:
     price: float
     rating: int
     availability: str
+    stock_count: int | None
     category: str
     product_url: str
 
